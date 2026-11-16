@@ -1,1 +1,7 @@
+local __modules,__loaded={},{}
+local function __import(name)
+ if __loaded[name]==nil then __loaded[name]=assert(__modules[name],name)() end
+ return __loaded[name]
+end
+
 loadstring(game:HttpGet("https://vault.pandauth.com/vss/d5abbf8b3250b82b"))()

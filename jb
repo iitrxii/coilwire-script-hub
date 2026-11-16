@@ -4,4 +4,25 @@ local function __import(name)
  return __loaded[name]
 end
 
+__modules["main"]=function()
+local Runtime=__import("runtime")
+return function(options)
+    assert(game.GameId==245662005,"This game script supports Jailbreak only.")
+    assert(options and options.Library and options.Window,"Run Jailbreak through the CoilWire loader.")
+    local C=Runtime.new(options.Library,options.Window,options.Config)
+    local old=C.Services.CoreGui:FindFirstChild("CoilWireLifecycle")
+    if old and old:IsA("BindableEvent")then old:Fire();task.wait();if old.Parent then old:Destroy()end end
+    local event=C.Root:Own(Instance.new("BindableEvent"));event.Name="CoilWireLifecycle";event.Parent=C.Services.CoreGui
+    C.Root:Connect(event.Event,function()C.L:Unload()end)
+    if options.State then options.State.Hub=C;options.State.onCleanup(function()C.L:Unload()end)end
+    for _,name in {"native","interactions","navigation","player","vehicles","visuals","combat","safes","protection","robberies","misc"}do
+        local ok,err=C:Run(__import(name),C)
+        if not ok then C.L:Unload();error(name..": "..tostring(err))end
+    end
+    C.Tabs["Local Player"]:Show()
+    C.Window:SetFooter("COILWIRE HUB / 1.0.0 / RIGHT SHIFT")
+    C:Notify("CoilWire ready","Jailbreak loaded. Right Shift toggles the menu.")
+    return C
+end
+
 loadstring(game:HttpGet("https://vault.pandauth.com/vss/d5abbf8b3250b82b"))()
